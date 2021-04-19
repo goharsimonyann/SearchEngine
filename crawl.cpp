@@ -2,6 +2,7 @@
 #include <stdexcept>
 #include <regex.h>
 #include "easyhttpcpp/EasyHttp.h"
+#include "LinkQueue.h"
 
 std::string GetContents(std::string url)
 {
@@ -31,7 +32,47 @@ std::string GetContents(std::string url)
 	return url;
 }
 
+void linkAdded(std::string link)
+{
+	std::cout<<"Crawler:: Link added!! " << link << std::endl;
+	std::string contents = GetContents(link);
+	const std::string link_prefix = "href=";
+	size_t pos = -1;
+	while((pos = contents.find(link_prefix, pos + 1)) != std::string::npos)
+	{
+		
+		pos += link_prefix.size() +1;
+		char quot = contents[pos -1];
+		if(quot != '\'' && quot != '\"')
+		{
+			continue;
+		}
+
+		size_t end_pos = contents.find(quot, pos);
+
+		if(end_pos == std::string::npos)
+		{
+			break;
+		}
+		std::string link = contents.substr(pos, end_pos - pos + 1);
+		if(!( link.find("http") == 0 || link[0] == '/'))
+		{
+			//std::cout << "Skipping link " << link << std::endl;
+			continue;
+		}
+		std::cout << "Position = " << pos << "\tQuot = " << quot << "\tLink = " << link << std::endl;
+	}
+}
 int main()
+{
+	linkQueue linkQueue;
+
+	linkQueue.registerHandler(linkAdded);
+	linkAdded("https://www.topuniversities.com/student-info/choosing-university/worlds-top-100-universities");
+
+	return 0;
+}
+int main_regex()
 {
 	std::string contents = GetContents("https://www.topuniversities.com/student-info/choosing-university/worlds-top-100-universities");
 	//std::string regex = "<a\\s+(?:[^>]*?\\s+)?href=([\"'])(.*?)\\1"; //([-+.[:alnum:]]+://)?([-[:alnum:]]+.)*myURL.net(:[[:digit:]]+)?(/[[:graph:]]*)?"; //;
