@@ -15,8 +15,9 @@ class linkQueue
 
     public:
     linkQueue();
-    void addLink(std::string url);
+    void addLink(std::string link);
     void registerHandler (linkHandler handler);  
     friend void * msgReceiver(void * arg);  
-
+    friend void* handlerInvoker(void* arg);
 };
+
