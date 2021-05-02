@@ -2,7 +2,7 @@
 #include <stdexcept>
 #include <regex.h>
 #include "easyhttpcpp/EasyHttp.h"
-#include "LinkQueue.h"
+#include "linkQueue.h"
 
 std::string GetContents(std::string url)
 {
@@ -39,8 +39,7 @@ void linkAdded(std::string link)
 	const std::string link_prefix = "href=";
 	size_t pos = -1;
 	while((pos = contents.find(link_prefix, pos + 1)) != std::string::npos)
-	{
-		
+	{		
 		pos += link_prefix.size() +1;
 		char quot = contents[pos -1];
 		if(quot != '\'' && quot != '\"')
@@ -61,15 +60,29 @@ void linkAdded(std::string link)
 			continue;
 		}
 		std::cout << "Position = " << pos << "\tQuot = " << quot << "\tLink = " << link << std::endl;
+		linkQueue.addLink(link);
 	}
 }
+
+void testHandler(std::string link)
+{
+	std::cout << "Link recieved " << link << std::endl;
+}
+
+void testHandler2(std::string link)
+{
+	std::cout << "Link recieved in test 2" << link << std::endl;
+}
+
 int main()
 {
-	linkQueue linkQueue;
-
-	linkQueue.registerHandler(linkAdded);
-	linkAdded("https://www.topuniversities.com/student-info/choosing-university/worlds-top-100-universities");
-
+	//linkQueue LinkQueue;
+	std::cout << "Running crawler " << std::endl;
+	linkQueue.registerHandler(testHandler);
+	linkQueue.registerHandler(testHandler2);
+	linkQueue.addLink("https://blablabla");
+	linkQueue.addLink("https://asdf asdf");
+	LinkQueue.registerHandler(linkAdded);
 	return 0;
 }
 int main_regex()
