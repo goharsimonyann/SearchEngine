@@ -13,9 +13,9 @@
 void* handlerInvoker(void* arg)
 {
     linkQueue* LinkQueue = (linkQueue*)arg;
-    while(linkQueue->_linkQueue.size())
+    while(LinkQueue->_linkQueue.size())
     {
-        pthread_mutex_lock(&linkQueue->_mutex);        
+        pthread_mutex_lock(&LinkQueue->mutex);        
         std::string link = LinkQueue->_linkQueue.front();
         Trace(link);
         LinkQueue->_linkQueue.pop();
@@ -41,8 +41,7 @@ void* msgReceiver(void* arg)
         pthread_t th;
         pthread_create(&th, NULL, handlerInvoker, arg);
         std::cout << "Queue size : " << LinkQueue->_linkQueue.size() << std::endl;
-        std::cout << "Handler size : " << LinkQueue->_handlers.size() << std::endl;
-       
+        std::cout << "Handler size : " << LinkQueue->_handlers.size() << std::endl;       
     }
 }
 
@@ -62,7 +61,7 @@ void linkQueue::addLink(std::string link)
     Trace("Adding link");    
     this->_linkQueue.push(link);
     Trace("Link added");
-    std::cout << "Queue size : " << LinkQueue->_linkQueue.size() << std::endl;
+    std::cout << "Queue size : " << _linkQueue.size() << std::endl;
     pthread_cond_signal(&condvar);
     Trace("Cond var is signaled");
     pthread_mutex_unlock(&mutex);
@@ -72,4 +71,3 @@ void linkQueue::registerHandler(linkHandler handler)
 {
     this->_handlers.insert(handler);
 }
-
