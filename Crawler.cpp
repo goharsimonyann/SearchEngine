@@ -3,6 +3,7 @@
 #include <regex.h>
 #include "easyhttpcpp/EasyHttp.h"
 #include "linkQueue.h"
+#include "repo_in_memory.hpp"
 
 std::string GetContents(std::string url)
 {
@@ -19,8 +20,8 @@ std::string GetContents(std::string url)
 	if (!pResponse->isSuccessful())
 	{
 		std::cerr << "HTTP GET Error: (" << pResponse->getCode() << ")" << std::endl;
-	}
-		else
+		return "";
+	} else
 		{
 			std::cout << "HTTP GET Success!" << std::endl;
 			const std::string contentType = pResponse->getHeaderValue("Content-Type", "");
@@ -28,20 +29,39 @@ std::string GetContents(std::string url)
 			{
 				return pResponse->getBody()->toString();
 			}
+			return "";
 		}
 	return url;
 }
 
+const int MAX_MATCHES = 10;
+linkQueue Linkqueue;
+Repo * repo;
+
 void linkAdded(std::string link)
 {
 	std::cout<<"Crawler:: Link added!! " << link << std::endl;
+	if(!( link.find("http")) == 0)
+	{
+		return;
+	}
+	repo->SaveLink(link);
 	std::string contents = GetContents(link);
+	
+	if(contents == "" || contents.size() < 100)
+	{
+		return;
+	}
+	repo->SaveSite(link, contents);
+	cout << "Contents size : "<<contents.size()<<endl;
+
 	const std::string link_prefix = "href=";
-	size_t pos = -1;
-	while((pos = contents.find(link_prefix, pos + 1)) != std::string::npos)
+	size_t pos = 0;
+
+	while((pos < contents.size()) && (pos = contents.find(link_prefix, pos + 1)) != std::string::npos)
 	{		
 		pos += link_prefix.size() +1;
-		char quot = contents[pos -1];
+	    char quot = contents[pos -1];
 		if(quot != '\'' && quot != '\"')
 		{
 			continue;
@@ -60,7 +80,7 @@ void linkAdded(std::string link)
 			continue;
 		}
 		std::cout << "Position = " << pos << "\tQuot = " << quot << "\tLink = " << link << std::endl;
-		linkQueue.addLink(link);
+		Linkqueue.addLink(link);
 	}
 }
 
@@ -78,11 +98,14 @@ int main()
 {
 	//linkQueue LinkQueue;
 	std::cout << "Running crawler " << std::endl;
-	linkQueue.registerHandler(testHandler);
+	/*linkQueue.registerHandler(testHandler);
 	linkQueue.registerHandler(testHandler2);
 	linkQueue.addLink("https://blablabla");
-	linkQueue.addLink("https://asdf asdf");
-	LinkQueue.registerHandler(linkAdded);
+	linkQueue.addLink("https://asdf asdf");*/
+	
+	repo = new RepoInMemory();
+	Linkqueue.registerHandler(linkAdded);
+	Linkqueue.registerHandler(repo->SaveLink);
 	return 0;
 }
 int main_regex()
@@ -113,5 +136,6 @@ int main_regex()
 	
 	return 0;
 }
+
 
 
