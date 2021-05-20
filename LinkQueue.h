@@ -20,4 +20,3 @@ class linkQueue
     friend void * msgReceiver(void * arg);  
     friend void* handlerInvoker(void* arg);
 };
-
