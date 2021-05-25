@@ -6,7 +6,7 @@ set(SAMPLE_SRCS "crawl.cpp")
 find_package(Poco REQUIRED Foundation Data DataSQLite Net NetSSL Crypto CONFIG)
 find_package(easyhttpcpp REQUIRED CONFIG)
 
-add_executable(${SAMPLE_NAME} ${SAMPLE_SRCS} linkQueue.cpp  repo_in_memory.cpp) 
+add_executable(${SAMPLE_NAME} ${SAMPLE_SRCS} linkQueue.cpp  repo_in_memory.cpp indexer.cpp) 
 target_link_libraries(${SAMPLE_NAME}
           easyhttpcpp::easyhttp
                     Poco::Foundation
