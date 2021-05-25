@@ -69,7 +69,7 @@ void linkAdded(std::string link)
 	indexer.AddSite(link, contents);
 
 	//stop after 50 sites
-	if(count++ > 20)		//funkciai kancheri qanaknenq hashvum
+	if(count++ > 100)		//funkciai kancheri qanaknenq hashvum
 	{
 		cout << "Stopping crawler!!!!!!!!" << endl;
 		return;
@@ -94,7 +94,7 @@ void linkAdded(std::string link)
 			break;
 		}
 		std::string link = contents.substr(pos, end_pos - pos + 1);
-		if(!( link.find("http") == 0 || link[0] == '/'))
+		if(!( link.find("http") == 0))
 		{
 			//std::cout << "Skipping link " << link << std::endl;
 			continue;
@@ -113,6 +113,7 @@ void testHandler2(std::string link)
 {
 	std::cout << "Link recieved in test 2" << link << std::endl;
 }
+int run_server();
 
 int main()
 {
@@ -128,12 +129,13 @@ int main()
 	linkAdded("https://www.topuniversities.com/student-info/choosing-university/worlds-top-100-universities");
 	sleep(2);
 
-	auto matches = indexer.GetRelevantURLs("university");
+/*	auto matches = indexer.GetRelevantURLs("university");
 
 	cout <<"================================="<<endl;
 
-	std::copy(matches.begin(), matches.end(), ostream_iterator<string>(std::cout, ", "));
-	
+	std::copy(matches.begin(), matches.end(), ostream_iterator<string>(std::cout, ",\n "));*/
+	cout<<"Running Server : "<<endl;
+	run_server();
 	cout<<"Running crawler - Done! "<<endl;
 
 	//Linkqueue.registerHandler(repo->SaveLink);
@@ -167,6 +169,7 @@ int main_regex()
 	
 	return 0;
 }
+
 
 
 
