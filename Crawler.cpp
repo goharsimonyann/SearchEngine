@@ -1,9 +1,15 @@
 #include <iostream>
 #include <stdexcept>
 #include <regex.h>
+#include <string>
+#include <unistd.h>
+#include <algorithm>
+#include <iterator>
 #include "easyhttpcpp/EasyHttp.h"
 #include "linkQueue.h"
 #include "repo_in_memory.hpp"
+#include "indexer.hpp"
+using namespace std;
 
 std::string GetContents(std::string url)
 {
@@ -21,7 +27,8 @@ std::string GetContents(std::string url)
 	{
 		std::cerr << "HTTP GET Error: (" << pResponse->getCode() << ")" << std::endl;
 		return "";
-	} else
+	}
+		else
 		{
 			std::cout << "HTTP GET Success!" << std::endl;
 			const std::string contentType = pResponse->getHeaderValue("Content-Type", "");
@@ -37,23 +44,36 @@ std::string GetContents(std::string url)
 const int MAX_MATCHES = 10;
 linkQueue Linkqueue;
 Repo * repo;
+Indexer indexer;
 
 void linkAdded(std::string link)
 {
+	static int count = 0;
 	std::cout<<"Crawler:: Link added!! " << link << std::endl;
 	if(!( link.find("http")) == 0)
 	{
 		return;
 	}
-	repo->SaveLink(link);
+	//Saves link
+	repo->SaveLink(link);    
 	std::string contents = GetContents(link);
 	
 	if(contents == "" || contents.size() < 100)
 	{
 		return;
 	}
+	//Saves site
 	repo->SaveSite(link, contents);
-	cout << "Contents size : "<<contents.size()<<endl;
+	//cout << "Contents size : "<<contents.size()<<endl;
+	//indexer activation
+	indexer.AddSite(link, contents);
+
+	//stop after 50 sites
+	if(count++ > 20)		//funkciai kancheri qanaknenq hashvum
+	{
+		cout << "Stopping crawler!!!!!!!!" << endl;
+		return;
+	}
 
 	const std::string link_prefix = "href=";
 	size_t pos = 0;
@@ -79,7 +99,7 @@ void linkAdded(std::string link)
 			//std::cout << "Skipping link " << link << std::endl;
 			continue;
 		}
-		std::cout << "Position = " << pos << "\tQuot = " << quot << "\tLink = " << link << std::endl;
+		//std::cout << "Position = " << pos << "\tQuot = " << quot << "\tLink = " << link << std::endl;
 		Linkqueue.addLink(link);
 	}
 }
@@ -105,7 +125,18 @@ int main()
 	
 	repo = new RepoInMemory();
 	Linkqueue.registerHandler(linkAdded);
-	Linkqueue.registerHandler(repo->SaveLink);
+	linkAdded("https://www.topuniversities.com/student-info/choosing-university/worlds-top-100-universities");
+	sleep(2);
+
+	auto matches = indexer.GetRelevantURLs("university");
+
+	cout <<"================================="<<endl;
+
+	std::copy(matches.begin(), matches.end(), ostream_iterator<string>(std::cout, ", "));
+	
+	cout<<"Running crawler - Done! "<<endl;
+
+	//Linkqueue.registerHandler(repo->SaveLink);
 	return 0;
 }
 int main_regex()
