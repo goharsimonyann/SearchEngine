@@ -30,8 +30,9 @@ void Indexer::AddSite(string url, string contents)
     {
         auto word = i->first;
         auto count = i->second;
-
+            pthread_mutex_lock(&_mutex);
             _index[word][count] = url;
+             pthread_mutex_unlock(&_mutex);
     }
 }
 
